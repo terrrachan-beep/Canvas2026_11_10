@@ -34,6 +34,13 @@ import androidx.compose.material3.Button
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.delay
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
+
+import androidx.compose.ui.layout.onSizeChanged
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,7 +49,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Canvas2026_11Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    DigitalInk(
+                    TestCanvas(
                         modifier = Modifier.padding(innerPadding)
                     )
 
@@ -74,6 +81,46 @@ fun TestCanvas(modifier: Modifier = Modifier) {
     val minionsImage: ImageBitmap =
         ImageBitmap.imageResource(id = R.drawable.minions)
 
+    // 小小兵のX座標
+    var minionX by remember { mutableStateOf(0f) }
+
+    // 小小兵のY座標
+    var minionY by remember { mutableStateOf(0f) }
+
+    // Canvasの幅
+    var canvasWidth by remember { mutableStateOf(0f) }
+
+    // Canvasの高さ
+    var canvasHeight by remember { mutableStateOf(0f) }
+
+    // ゲームが停止しているかどうか
+    var gameOver by remember { mutableStateOf(false) }
+
+    // 小小兵を中央に置くための位置
+    val offsetX = (canvasWidth - minionsImage.width) / 2f
+    val offsetY = (canvasHeight - minionsImage.height) / 2f
+
+    LaunchedEffect(gameOver, canvasWidth, canvasHeight) {
+
+        while (!gameOver) {
+
+            delay(100L)
+
+            // X軸・Y軸をそれぞれ5ずつ増やす
+            minionX += 5f
+            minionY += 5f
+
+            // 画面の右下から完全に出たか確認
+            if (minionX + offsetX >= canvasWidth &&
+                minionY + offsetY >= canvasHeight) {
+
+                // 最初の位置に戻す
+                minionX = 0f
+                minionY = 0f
+            }
+        }
+    }
+
     // 建立一個新的路徑物件
     /*val path =
         Path().apply {
@@ -87,10 +134,18 @@ fun TestCanvas(modifier: Modifier = Modifier) {
     var path by remember {
         mutableStateOf(Path())
     }
-
+    Column(
+        modifier = modifier.fillMaxSize()
+    ) {
 
     Canvas(
         modifier = modifier.fillMaxSize()
+            .fillMaxWidth()
+            .weight(1f)
+            .onSizeChanged {
+                canvasWidth = it.width.toFloat()
+                canvasHeight = it.height.toFloat()
+            }
             .pointerInput(Unit) {
                 // 監聽拖曳手勢
                 detectDragGestures(
@@ -151,16 +206,9 @@ fun TestCanvas(modifier: Modifier = Modifier) {
             strokeWidth = 10f
         )
 
-        //取得小小兵圖檔的寬度與高度
-        val minionsWidth = minionsImage.width
-        val minionsHeight = minionsImage.height
 
-        // 置中公式：(畫布寬高 - 圖片寬高) / 2f
-        val offsetX = (size.width - minionsWidth) / 2f
-        val offsetY = (size.height - minionsHeight) / 2f
-
-        // 將畫布起點移至置中位置後畫圖
-        translate(offsetX, offsetY) {
+        // ミニオンを描画する
+        translate(offsetX + minionX, offsetY + minionY) {
             drawImage(minionsImage)
         }
 
@@ -170,7 +218,17 @@ fun TestCanvas(modifier: Modifier = Modifier) {
 
 
     }
+    Button(
+        onClick = {
+            gameOver = !gameOver
+        }
+    ) {
+        Text(
+            if (gameOver) "繼續遊戲" else "停止遊戲"
+        )
+    }
 }
+
 
 @Composable
 fun DigitalInk(modifier: Modifier = Modifier) {
