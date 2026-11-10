@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -23,6 +24,7 @@ import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import tw.edu.pu.csim.tcyang.canvas2026_11.ui.theme.Canvas2026_11Theme
@@ -84,6 +86,39 @@ fun TestCanvas(modifier: Modifier = Modifier) {
 
     Canvas(
         modifier = modifier.fillMaxSize()
+            .pointerInput(Unit) {
+                // 監聽拖曳手勢
+                detectDragGestures(
+                    onDragStart = { offset -> /* 手指按下 */
+                        // 按下：記錄 Path 起點
+                        val x = offset.x
+                        val y = offset.y
+
+                        path.reset()  // 將 path 物件完全清空並重置
+                        path.moveTo(x, y)
+                    },
+
+                    onDrag = { change, dragAmount -> /* 手指移動 */
+                        // 消費拖曳事件（避免影響父層元件手勢）
+                        // 這個移動手勢已經被 Canvas 處理，請不要再傳給外層的其他元件
+                        change.consume()
+
+                        // 移動：拉線並加入點座標
+                        val x = change.position.x
+                        val y = change.position.y
+                        path.lineTo(x, y)
+
+                        //複製出一個內容一模一樣、但記憶體位址全新的 Path 物件
+                        // 並指派回 path，藉此強制 Compose 重繪 Canvas 畫面
+                        val tempPath = Path()
+                        tempPath.addPath(path)
+                        path = tempPath
+                    },
+
+                    onDragEnd = { /* 手指離開 */ }
+                )
+            }
+
     ) {
         //繪製洋紅色的圓, 半徑 100, 圓心 (100,100)
         drawCircle(
