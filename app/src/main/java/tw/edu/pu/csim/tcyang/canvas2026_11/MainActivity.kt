@@ -20,7 +20,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.translate
@@ -28,6 +27,12 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import tw.edu.pu.csim.tcyang.canvas2026_11.ui.theme.Canvas2026_11Theme
+
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.Button
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.unit.dp
 
 
 class MainActivity : ComponentActivity() {
@@ -37,7 +42,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Canvas2026_11Theme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    TestCanvas(
+                    DigitalInk(
                         modifier = Modifier.padding(innerPadding)
                     )
 
@@ -164,5 +169,44 @@ fun TestCanvas(modifier: Modifier = Modifier) {
 
 
 
+    }
+}
+
+@Composable
+fun DigitalInk(modifier: Modifier = Modifier) {
+
+    var path by remember { mutableStateOf(Path() )}
+
+    var recognizedText by remember {
+        mutableStateOf("請在畫布區手寫，再按「開始辨識」按鈕")
+    }
+
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Canvas(
+            modifier = Modifier.size(300.dp)
+                .border(2.dp, Color.Gray)
+        ) {
+        drawPath(path, Color.Black, 1f, Stroke(width = 10f))
+    }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row {
+            // 開始辨識
+            Button(onClick = {
+            }) {
+                Text("開始辨識")
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            // 清除畫布
+            Button(onClick = {
+                path = Path()  // 指派新物件位址，立刻觸發 Canvas 重繪並清空畫面
+            }){
+                Text("清除")
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(recognizedText)
     }
 }
