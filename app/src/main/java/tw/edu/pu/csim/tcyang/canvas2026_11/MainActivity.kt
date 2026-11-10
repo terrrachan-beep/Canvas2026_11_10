@@ -10,14 +10,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.PaintingStyle.Companion.Stroke
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.tooling.preview.Preview
 import tw.edu.pu.csim.tcyang.canvas2026_11.ui.theme.Canvas2026_11Theme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,6 +63,25 @@ fun GreetingPreview() {
 
 @Composable
 fun TestCanvas(modifier: Modifier = Modifier) {
+    // 載入圖片資源 (小小兵)
+    val minionsImage: ImageBitmap =
+        ImageBitmap.imageResource(id = R.drawable.minions)
+
+    // 建立一個新的路徑物件
+    /*val path =
+        Path().apply {
+            moveTo(50f, 100f)  // 移動到起始點 (50f, 100f)
+            lineTo(200f, 500f)  // 畫一條線到 (200f, 500f)
+            lineTo(450f, 400f)  // 畫一條線到 (450f, 400f)
+            close()  // 閉合路徑
+        }
+
+     */
+    var path by remember {
+        mutableStateOf(Path())
+    }
+
+
     Canvas(
         modifier = modifier.fillMaxSize()
     ) {
@@ -71,6 +99,35 @@ fun TestCanvas(modifier: Modifier = Modifier) {
             Size(200f, 200f),
             style = Stroke(width = 5f) // 使用 style 控制外框樣式
         )
+
+        // 繪製紅色的線， 從 (200,800) 畫到右下角, 線條粗細 10
+        // size.width：畫布的總寬度（Float）
+        // size.height：畫布的總高度（Float)
+
+        drawLine(
+            Color.Red,
+            Offset(200f, 800f),
+            Offset(size.width, size.height),
+            strokeWidth = 10f
+        )
+
+        //取得小小兵圖檔的寬度與高度
+        val minionsWidth = minionsImage.width
+        val minionsHeight = minionsImage.height
+
+        // 置中公式：(畫布寬高 - 圖片寬高) / 2f
+        val offsetX = (size.width - minionsWidth) / 2f
+        val offsetY = (size.height - minionsHeight) / 2f
+
+        // 將畫布起點移至置中位置後畫圖
+        translate(offsetX, offsetY) {
+            drawImage(minionsImage)
+        }
+
+        // 繪製綠色路徑，透明度1 (不透明)，線條粗細10
+        drawPath(path, Color.Green, 1f, Stroke(width = 10f))
+
+
 
     }
 }
