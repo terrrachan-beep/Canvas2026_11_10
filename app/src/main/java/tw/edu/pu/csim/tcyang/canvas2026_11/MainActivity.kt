@@ -96,25 +96,20 @@ fun TestCanvas(modifier: Modifier = Modifier) {
     // ゲームが停止しているかどうか
     var gameOver by remember { mutableStateOf(false) }
 
-    // 小小兵を中央に置くための位置
-    val offsetX = (canvasWidth - minionsImage.width) / 2f
-    val offsetY = (canvasHeight - minionsImage.height) / 2f
 
     LaunchedEffect(gameOver, canvasWidth, canvasHeight) {
+        while (!gameOver && canvasWidth > 0f && canvasHeight > 0f) {
 
-        while (!gameOver) {
+            delay(50L)
 
-            delay(100L)
+            // ミニオンを右下へ移動
+            minionX += 10f
+            minionY += 10f
 
-            // X軸・Y軸をそれぞれ5ずつ増やす
-            minionX += 5f
-            minionY += 5f
+            // 画面外に出たら左上に戻す
+            if (minionX >= canvasWidth &&
+                minionY >= canvasHeight) {
 
-            // 画面の右下から完全に出たか確認
-            if (minionX + offsetX >= canvasWidth &&
-                minionY + offsetY >= canvasHeight) {
-
-                // 最初の位置に戻す
                 minionX = 0f
                 minionY = 0f
             }
@@ -139,7 +134,7 @@ fun TestCanvas(modifier: Modifier = Modifier) {
     ) {
 
     Canvas(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
             .fillMaxWidth()
             .weight(1f)
             .onSizeChanged {
@@ -208,7 +203,7 @@ fun TestCanvas(modifier: Modifier = Modifier) {
 
 
         // ミニオンを描画する
-        translate(offsetX + minionX, offsetY + minionY) {
+        translate(minionX, minionY) {
             drawImage(minionsImage)
         }
 
@@ -267,4 +262,6 @@ fun DigitalInk(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(16.dp))
         Text(recognizedText)
     }
+}
+
 }
